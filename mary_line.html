@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="simple.css" />
+    <title>MARYのLINE風</title>
+  </head>
+  <body>
+    <!-- コンテンツ表示画面 -->
+    <div style="overflow: visible; /* コンテンツがはみ出しても切り取らない */">
+      <img
+        src="./marylogo.png"
+        alt="マリー ロゴ"
+        style="width: 100px; height: auto"
+      />
+      <div
+        id="output"
+        style="
+          overflow: auto;
+          height: 500px;
+          margin-top: 0px;
+          position: relative;
+        "
+      ></div>
+      <div>名前：<input type="text" id="uname" class="uname" /></div>
+      <div>
+        <textarea id="text" cols="30" rows="10" class="text"></textarea>
+        <div><button id="send">送信</button>
+        </div>  
+      </div>
+    </div>
+    <!--/ ツ表示画面 -->
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- JQuery -->
+
+    <!--** 以下Firebase **-->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        set,
+        onChildAdded,
+      } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCQ5DyS8tTNZ38YiaTTIiDUTJXXg_wySfU",
+        authDomain: "sample-ef904.firebaseapp.com",
+        projectId: "sample-ef904",
+        storageBucket: "sample-ef904.appspot.com",
+        messagingSenderId: "84165967795",
+        appId: "1:84165967795:web:dc14d71919884174f355c6",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const dbRef = ref(db, "chat/memo999");
+
+      let lastUsername = null; // 前回の名前を保存する変数
+      $("#send").on("click", async function () {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0'); // 時間を2桁に
+        const minutes = now.getMinutes().toString().padStart(2, '0'); // 分を2桁に
+        const timeString = hours + ":" + minutes;
+        const msg = {
+          uname: $("#uname").val(),
+          text: $("#text").val(),
+          time: timeString,
+          date: now.toISOString().split('T')[0]  // YYYY-MM-DD 形式で日付を追加
+        };
+
+        const newPostRef = push(dbRef);
+        set(newPostRef, msg);
+
+        // アニメーションを適用
+        const outputElement = $("#output");
+        outputElement.addClass('animated-slide-up');
+
+        // アニメーションが終わった後にクラスを削除
+        setTimeout(() => {
+          outputElement.removeClass('animated-slide-up');
+        }, 300); // アニメーションの時間に合わせてください
+      });
+
+      function updateTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0'); // 時間を2桁に
+        const minutes = now.getMinutes().toString().padStart(2, '0'); // 分を2桁に
+        const timeString = hours + ":" + minutes;
+        document.getElementById("time").textContent = timeString;
+      }
+
+      // 現在の日付を保存する変数
+      let currentDate = null;
+
+      onChildAdded(dbRef, function (data) {
+        const msg = data.val();
+        if (msg) {
+          const messageDate = new Date(msg.date);
+          if (isNaN(messageDate.getTime())) {
+            console.log("無効な日付です:", msg.date);
+          } else {
+            const messageDateString = `${messageDate.getMonth() + 1}/${messageDate.getDate()} (${['日', '月', '火', '水', '木', '金', '土'][messageDate.getDay()]})`;
+
+            // 日が変わったか確認
+            if (!currentDate || currentDate !== messageDateString) {
+              currentDate = messageDateString;
+              const dateDisplay = `<div class='date-separator'>${currentDate}</div>`;
+              $("#output").append(dateDisplay);
+            }
+
+            let h = "<p class='bubble'>";
+            h += "<span style='padding: 5px; border-radius: 10px;'>" + msg.uname + "</span>";
+            h += "<span style='display: block; width: 100%;'>" + msg.text + "</span>";
+            h += "</p>"; // ここでpタグを閉じる
+            h += "<span style='display: block; margin-left: 20px; text-align: right;'>" + msg.time + "</span>"; // 時間を右寄りに表示
+
+          if (msg.uname === "まり") {
+            h = h.replace("<p class='bubble'>", "<p class='bubble' style='background-color: #8EE386;'>");
+          } else {
+            h = h.replace("<p class='bubble'>", "<p class='bubble' style='background-color:white;'>");
+          }
+
+            $("#output").append(h);
+          }
+        } else {
+          console.log("データが存在しません。");
+        }
+      });
+
+      // unameとtextクラスを持つすべての素を選択
+      const elements = document.querySelectorAll(".uname, .text");
+
+      // 各要素にスタイルを適用
+      elements.forEach((element) => {
+        element.style.backgroundColor = "white";
+        element.style.border = "2px solid #ccc";
+        element.style.borderRadius = "10px";
+        element.style.padding = "10px";
+        element.style.maxWidth = "300px";
+        element.style.position = "relative";
+        element.style.margin = "10px";
+      });
+    </script>
+  </body>
+</html>

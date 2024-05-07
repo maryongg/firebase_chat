@@ -1,0 +1,72 @@
+body {
+  background-color: #93aad4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* ビューポートの高さに合わせる */
+  text-align: center;
+  margin-top: 100px;
+}
+
+.bubble,
+.bubble-white {
+  position: relative;
+  border-radius: 0.4em;
+  padding: 10px;
+  margin: 10px 0;
+  text-align: left;
+  width: 80%; /* 幅をパーセンテージで指定 */
+  max-width: 500px; /* 最大幅を指定 */
+}
+
+.bubble::after,
+.bubble-white::after {
+  content: "";
+}
+
+#output {
+  width: 300px; /* 幅を指定 */
+}
+
+/* スマートフォン用のスタイル */
+@media (max-width: 768px) {
+  .bubble,
+  .bubble-white {
+    padding: 8px;
+    margin: 8px 0;
+    width: 90%; /* スマートフォンでは幅を広げる */
+  }
+
+  .bubble::after,
+  .bubble-white::after {
+    border: 8px solid transparent;
+    margin-top: -8px;
+  }
+}
+
+button {
+  background-color: #06c655;
+  color: white;
+  font-size: 16px;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-20px);
+  }
+}
+
+.animated-slide-up {
+  animation: slideUp 0.5s ease forwards;
+}
+
+.uname,
+.text {
+  transform: translateY(0px); /* 位置を元に戻す */
+}
